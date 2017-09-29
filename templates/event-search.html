@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}Event Lookup{% endblock %}
+
+{% block content %}
+Broader keywords recommended, eg. "going away" or "dinner party". Single words like "party" return venues more often than not.
+<form action="/upcoming-events">
+    Event keyword: <input type="text" name="event-keyword"><br>
+    City name: <input type="text" name="city">
+<input type="submit">
+{% endblock %}

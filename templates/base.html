@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+<head>
+<title>{% block title %}TITLE HERE{% endblock %}</title>
+{% block head %}
+    {% for alert in get_flashed_messages() %}
+        <div>{{ alert }}</div>
+    {% endfor %}
+{% endblock %}
+</head>
+<body>
+    {% block content %}
+    {% endblock %}
+</body>
+
+
+<footer><br><br>
+    For discerning connoisseurs of risky ideas only.
+</footer>
+</html>

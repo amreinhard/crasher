@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Event Results{% endblock %}
+{% block head %}     
+    <script src="https://maps.googleapis.com/maps/api/js"></script>
+    <script src="/static/mapstyle.js"></script>
+    <script src="/static/map.js"></script>
+{% endblock %}
+
+{% block content %}
+    {% for keys, results in results_dict.iteritems() %}
+        {{ keys.replace("_", " ").replace("is", "") }} {{ results }} <br>
+    {% endfor %}
+
+    <div id='event-map'></div>
+{% endblock %}
