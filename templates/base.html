@@ -1,12 +1,13 @@
 <!doctype html>
 <html>
 <head>
-<title>{% block title %}TITLE HERE{% endblock %}</title>
-{% block head %}
-    {% for alert in get_flashed_messages() %}
-        <div>{{ alert }}</div>
-    {% endfor %}
-{% endblock %}
+    <link href="/static/format.css" rel="stylesheet">
+    <title>{% block title %}TITLE HERE{% endblock %}</title>
+    {% block head %}
+        {% for alert in get_flashed_messages() %}
+            <div>{{ alert }}</div>
+        {% endfor %}
+    {% endblock %}
 </head>
 <body>
     {% block content %}

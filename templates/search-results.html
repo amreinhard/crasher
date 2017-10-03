@@ -3,6 +3,7 @@
 {% block title %}Event Results{% endblock %}
 {% block head %}     
     <script src="https://maps.googleapis.com/maps/api/js"></script>
+    <script src="https://code.jquery.com/jquery.js"></script>
     <script src="/static/mapstyle.js"></script>
     <script src="/static/map.js"></script>
 {% endblock %}
@@ -13,4 +14,5 @@
     {% endfor %}
 
     <div id='event-map'></div>
+
 {% endblock %}

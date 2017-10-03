@@ -2,3 +2,4 @@
 secrets.sh
 *.pyc
 DS_Store
+event-results.json

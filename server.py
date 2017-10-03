@@ -1,6 +1,7 @@
 import facebook
 import os
 import json
+import time
 from pprint import pprint
 from flask import Flask, flash, redirect, request, render_template
 from flask_debugtoolbar import DebugToolbarExtension
@@ -29,13 +30,14 @@ def render_event_form():
 def plot_events():
     """Finds and returns upcoming events from Facebook."""
 
+    current_time = int(time.time())
     event_keyword = request.args.get('event-keyword').strip().replace(" ", "%20")
     search_location = request.args.get('city').strip().lower()
     results_dict = {}
-    events = graph.request("/search?q=" + event_keyword + "&type=event&limit=10000")
+    events = graph.request("/search?q=" + event_keyword + "&type=event&limit=100") # &since=" + str(current_time) + "&after=")
     event_list = events['data']
-    #how do I keep iterating through the next 10000+ results?
-    #how do I make sure I don't get expired events?
+    pprint(events)
+    #how do I utilize pagination? or filter for more accurate local results?
 
     if event_keyword and search_location:
         for individual_events in event_list:
@@ -74,7 +76,7 @@ def plot_events():
 
     if results_dict == {}:
         flash("No results found.")
-        return redirect("/event-search")
+        return redirect('/event-search')
 
     json.dump(results_dict, open('event-results.json', 'w'))
 
