@@ -1,6 +1,6 @@
 import facebook, json, os, time
 from pprint import pprint
-from flask import Flask, flash, redirect, request, render_template
+from flask import Flask, flash, redirect, request, render_template, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 
 app = Flask(__name__)
@@ -52,18 +52,18 @@ def plot_events():
                 if event_data['attending_count'] <= 75 and \
                     event_data['is_canceled'] is False and \
                         event_data['is_page_owned'] is False:
-                    results_dict['url' + ':'] = "https://www.facebook.com/events/" + str(event_id) + "/"
-                    results_dict['event_name' + ':'] = individual_events['name']
-                    results_dict['event_description' + ':'] = individual_events['description']
+                    results_dict['url'] = "https://www.facebook.com/events/" + str(event_id) + "/"
+                    results_dict['event_name'] = individual_events['name']
+                    results_dict['event_description'] = individual_events['description']
                     for pkeys, pvals in individual_events['place'].iteritems():
                         if str(pkeys) == 'location':
                             for lkeys, lvals in pvals.iteritems():
-                                results_dict[lkeys + ":"] = lvals
+                                results_dict[lkeys] = lvals
                         else:
-                            results_dict[pkeys + ":"] = pvals
+                            results_dict[pkeys] = pvals
                         #else bit prints event owner data, if unpacks location
                     for keys, values in event_data.iteritems():
-                        results_dict[keys + ":"] = values
+                        results_dict[keys] = values
                 else:
                     continue
             else:
@@ -83,17 +83,18 @@ def plot_events():
     #     check_next = paging.get('next', {})
     #     pprint(check_next)
 
-    json.dump(results_dict, open('event-results.js', 'w'))
+    json.dump(results_dict, open('event-results.json', 'w'))
+    pprint(results_dict)
 
-    return render_template("/search-results.html", results_dict=results_dict)
+    return render_template("/search-results.html")
 
 
-# @app.route("/process-json")
-# def jconvert():
-#     """Turns JSON to JS obj."""
+@app.route("/process-json")
+def jconvert():
+    """Turns JSON to JS obj."""
 
-#     processor = open('event-results.json', 'r')
-#     json.dump(processor, open('event-results.js', 'w'))
+    processor = open('event-results.json', 'r')
+    return jsonify(processor.read())
 
 
 ### Helper Functions ####

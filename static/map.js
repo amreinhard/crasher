@@ -1,6 +1,6 @@
 function initMap() {
     var eventMap = new google.maps.Map(document.getElementById('event-map'), {
-        center: {lat: 37.7400, lng: -122.4100},
+        center: {lat: 40.7400, lng: -73.9900},
         scrollwheel: true,
         zoom: 12,
         zoomControl: false,
@@ -13,28 +13,28 @@ function initMap() {
   });
 // open, read, turn into json obj
 
-
-    function readJSON(file) {
+    $.get('/process-json', function(result) {
         var marker;
-        for (var contents in results) {
-            if (contents.hasOwnProperty('longitude') && contents.hasOwnProperty('latitude')) {
+        var results = JSON.parse(result);
+        debugger;
+       // for (var contents in results) {
+            if (results.hasOwnProperty("longitude") && results.hasOwnProperty('latitude')) {
                 marker = new google.maps.Marker({
-                    position: new google.maps.LatLng(contents.latitude, contents.longitude),
+                    position: new google.maps.LatLng(results.latitude, results.longitude),
                     map: eventMap,
-                    title: "Event name:" + contents.event_name
+                    title: "Event name:" + results.event_name
                 });
 
                 eventPreview = (
                     '<div class="window-content">' +
-                        '<p><b>Event description:</b>' + contents.event_description + '</p>' +
-                        '<p><b>Location</b>' + contents.street + '</p>' +
-                        '<p><b>Link: ' + '<a href="' + contents.url + '">' + contents.event_name + '</a></p>' +
+                        '<p><b>Event description: </b>' + results.event_description + '</p>' +
+                        '<p><b>Location: </b>' + results.street + '</p>' +
+                        '<p><b>Link: ' + '<a href="' + results.url + '">' + results.event_name + '</a></p>' +
                     '</div>');
 
                 bindInfoWindow(marker, eventMap, infoWindow, eventPreview);
             }
-        }
-    }
+    });
 
     function bindInfoWindow(marker, eventMap, infoWindow, eventPreview) {
         google.maps.event.addListener(marker, 'click', function () {
