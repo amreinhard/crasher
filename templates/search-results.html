@@ -2,10 +2,7 @@
 
 {% block title %}Event Results{% endblock %}
 {% block head %}     
-    <script src="https://maps.googleapis.com/maps/api/js"></script>
     <script src="https://code.jquery.com/jquery.js"></script>
-    <script src="/static/mapstyle.js"></script>
-    <script src="/static/map.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -13,6 +10,10 @@
         {{ keys.replace("_", " ").replace("is", "") }} {{ results }} <br>
     {% endfor %}
 
+    <script src="/static/map.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=mykey&callback=initMap" async defer>
+    </script>
+    <!-- txt file for key? more like img less html/key.js?-->
+    <script src="/static/mapstyle.js"></script>
     <div id='event-map'></div>
-
 {% endblock %}

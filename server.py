@@ -1,7 +1,4 @@
-import facebook
-import os
-import json
-import time
+import facebook, json, os, time
 from pprint import pprint
 from flask import Flask, flash, redirect, request, render_template
 from flask_debugtoolbar import DebugToolbarExtension
@@ -34,13 +31,13 @@ def plot_events():
     event_keyword = request.args.get('event-keyword').strip().replace(" ", "%20")
     search_location = request.args.get('city').strip().lower()
     results_dict = {}
-    events = graph.request("/search?q=" + event_keyword + "&type=event&limit=100") # &since=" + str(current_time) + "&after=")
-    event_list = events['data']
-    pprint(events)
-    #how do I utilize pagination? or filter for more accurate local results?
+    counter = 0
+    events = graph.request("/search?q=" + event_keyword + "&type=event&limit=100&since=" + str(current_time), post_args={'method': 'get'})
+    #how do I utilize pagination? 
 
     if event_keyword and search_location:
-        for individual_events in event_list:
+        for individual_events in events['data']:
+            counter += 1
             event_id = individual_events['id']  # ID NEEDED TO ACCESS EVENTS
             check_place = individual_events.get('place', {})
             check_location = check_place.get('location', {})
@@ -51,6 +48,7 @@ def plot_events():
                                               fields='attending_count, \
                 category,start_time,end_time,interested_count,is_canceled, \
                 is_page_owned,maybe_count,ticket_uri,timezone,type')
+                pprint(event_data)
                 if event_data['attending_count'] <= 75 and \
                     event_data['is_canceled'] is False and \
                         event_data['is_page_owned'] is False:
@@ -73,16 +71,32 @@ def plot_events():
     else:
         flash("You have to fill in both fields!")
         return redirect("/event-search")
+    print counter
 
     if results_dict == {}:
         flash("No results found.")
+
         return redirect('/event-search')
 
-    json.dump(results_dict, open('event-results.json', 'w'))
+    # for paging in events['paging']:
+    #     check_cursors = paging.get('cursors', {})
+    #     check_next = paging.get('next', {})
+    #     pprint(check_next)
+
+    json.dump(results_dict, open('event-results.js', 'w'))
 
     return render_template("/search-results.html", results_dict=results_dict)
 
-#### Helper Functions ####
+
+# @app.route("/process-json")
+# def jconvert():
+#     """Turns JSON to JS obj."""
+
+#     processor = open('event-results.json', 'r')
+#     json.dump(processor, open('event-results.js', 'w'))
+
+
+### Helper Functions ####
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
     app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
