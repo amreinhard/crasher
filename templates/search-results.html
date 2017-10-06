@@ -6,11 +6,14 @@
 {% endblock %}
 
 {% block content %}
-
-    <script src="/static/map.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7lvYh6B1mVq3aSbMvioSCqnN8OTu3aIA&callback=initMap" async defer>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7lvYh6B1mVq3aSbMvioSCqnN8OTu3aIA">
     </script>
-    <!-- txt file for key? more like img less html/key.js?-->
+    <script src="/static/map.js"></script>
     <script src="/static/mapstyle.js"></script>
     <div id='event-map'></div>
+
+    {% if check_pagination != {} %}
+        <a href="/pagination">Next</a>
+        <!--there's gotta be a better way to do this -->
+    {% endblock %}
 {% endblock %}

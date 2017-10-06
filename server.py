@@ -32,7 +32,8 @@ def plot_events():
     search_location = request.args.get('city').strip().lower()
     results_dict = {}
     counter = 0
-    events = graph.request("/search?q=" + event_keyword + "&type=event&limit=100&since=" + str(current_time), post_args={'method': 'get'})
+    events = graph.request("/search?q=" + event_keyword + "&type=event&limit=1000&since=" + str(current_time), post_args={'method': 'get'})
+    check_pagination = events.get('paging', {})
     #how do I utilize pagination? 
 
     if event_keyword and search_location:
@@ -48,7 +49,6 @@ def plot_events():
                                               fields='attending_count, \
                 category,start_time,end_time,interested_count,is_canceled, \
                 is_page_owned,maybe_count,ticket_uri,timezone,type')
-                pprint(event_data)
                 if event_data['attending_count'] <= 75 and \
                     event_data['is_canceled'] is False and \
                         event_data['is_page_owned'] is False:
@@ -71,22 +71,17 @@ def plot_events():
     else:
         flash("You have to fill in both fields!")
         return redirect("/event-search")
+
     print counter
 
     if results_dict == {}:
         flash("No results found.")
-
         return redirect('/event-search')
-
-    # for paging in events['paging']:
-    #     check_cursors = paging.get('cursors', {})
-    #     check_next = paging.get('next', {})
-    #     pprint(check_next)
 
     json.dump(results_dict, open('event-results.json', 'w'))
     pprint(results_dict)
 
-    return render_template("/search-results.html")
+    return check_pagination, redirect("/pagination", check_pagination=check_pagination)
 
 
 @app.route("/process-json")
@@ -94,7 +89,25 @@ def jconvert():
     """Turns JSON to JS obj."""
 
     processor = open('event-results.json', 'r')
-    return jsonify(processor.read())
+    json_string = processor.read()
+    processor.close()
+    data = json.loads(json_string)
+    return jsonify(data)
+
+
+@app.route('/pagination')
+def paginate():
+    """Allows next page of results from Graph."""
+
+    for paging in check_pagination:
+       # check_cursors = check_pagination.get('cursors', {})
+        check_after = check_cursors.get('after', '')
+       # check_before = check_cursors.get('before', '')
+        check_next = check_pagination.get('next', '')
+        if check_after != '':
+            next_page = graph.request("/search?access_token=" + user_token + "&since=" + current_time + "&q=" + event_keyword + "&type=event&limit=1000&after=" + check_after)
+
+    return render_template("/search-results.html", )
 
 
 ### Helper Functions ####

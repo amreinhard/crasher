@@ -1,6 +1,14 @@
-function initMap() {
+"use strict";
+
+$.get('/process-json', function(results){
+    console.log(results);
+    initMap(results);
+});
+
+function initMap(results) {
+    console.log(results);
     var eventMap = new google.maps.Map(document.getElementById('event-map'), {
-        center: {lat: 40.7400, lng: -73.9900},
+        center: {lat: results.latitude, lng: results.longitude},
         scrollwheel: true,
         zoom: 12,
         zoomControl: false,
@@ -9,14 +17,11 @@ function initMap() {
     });
 
     var infoWindow = new google.maps.InfoWindow({
-    width: 150
+        width: 150
   });
-// open, read, turn into json obj
 
-    $.get('/process-json', function(result) {
+    function createMarker(results) {
         var marker;
-        var results = JSON.parse(result);
-        debugger;
        // for (var contents in results) {
             if (results.hasOwnProperty("longitude") && results.hasOwnProperty('latitude')) {
                 marker = new google.maps.Marker({
@@ -25,7 +30,7 @@ function initMap() {
                     title: "Event name:" + results.event_name
                 });
 
-                eventPreview = (
+                var eventPreview = (
                     '<div class="window-content">' +
                         '<p><b>Event description: </b>' + results.event_description + '</p>' +
                         '<p><b>Location: </b>' + results.street + '</p>' +
@@ -34,7 +39,9 @@ function initMap() {
 
                 bindInfoWindow(marker, eventMap, infoWindow, eventPreview);
             }
-    });
+    }
+
+    createMarker(results);
 
     function bindInfoWindow(marker, eventMap, infoWindow, eventPreview) {
         google.maps.event.addListener(marker, 'click', function () {
