@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7lvYh6B1mVq3aSbMvioSCqnN8OTu3aIA">
+    <script src="https://maps.googleapis.com/maps/api/js?key=" + gmaps_key>
     </script>
     <script src="/static/map.js"></script>
     <script src="/static/mapstyle.js"></script>
@@ -15,5 +15,5 @@
     {% if check_pagination != {} %}
         <a href="/pagination">Next</a>
         <!--there's gotta be a better way to do this -->
-    {% endblock %}
+    {% endif %}
 {% endblock %}
