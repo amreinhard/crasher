@@ -25,20 +25,14 @@ def render_event_form():
 
 @app.route("/upcoming-events", methods=["GET"])
 def grab_events():
-    #use sets
-    events = graph.request("/search?q=" + event_keyword + "&type=event&limit=1000&since=" + str(current_time), post_args={'method': 'get'}) 
-        #rewrite to offset, store in sets, assume duplication
-        #write a loop that handles the sorting here
-    return events
+    """Gets from HTML, grabs events from Graph API."""
 
-
-def plot_events():
-    """Handles HTML inputs, cleanup and other random variables."""
-
-    current_time = int(time.time()) #do I even need this with offset?
     event_keyword = request.args.get('event-keyword').strip().replace(" ", "%20")
     search_location = request.args.get('city').strip().lower()
-    results_dict = {}
+    #use sets
+    events = graph.request("/search?q=" + event_keyword + "&type=event&limit=10000&since=" + str(current_time), post_args={'method': 'get'}) 
+    #rewrite to offset, store in sets, assume duplication
+    return events
 
 
 def input_checks():
@@ -57,45 +51,49 @@ def input_checks():
         flash("You have to fill in both fields!")
         return redirect("/event-search")
 
-    return check_city
+    return event_dict
 
-def 
+def event_details():
+    """Makes batch request to Graph for event details."""
 
-    
-        event_id = individual_events['id']  # id used for composing events URL
-        event_data = graph.get_object(id=event_id,
+    event_data = graph.get_object(id=event_dict,
                                       fields='attending_count, \
         category,start_time,end_time,interested_count,is_canceled, \
         is_page_owned,maybe_count,ticket_uri,timezone,type')
-                if event_data['attending_count'] <= 75 and \
-                    event_data['is_canceled'] is False and \
-                        event_data['is_page_owned'] is False:
-                    results_dict['url'] = "https://www.facebook.com/events/" + str(event_id) + "/"
-                    results_dict['event_name'] = individual_events['name']
-                    results_dict['event_description'] = individual_events['description']
-                    for pkeys, pvals in individual_events['place'].iteritems():
-                        if str(pkeys) == 'location':
-                            for lkeys, lvals in pvals.iteritems():
-                                results_dict[lkeys] = lvals
-                        else:
-                            results_dict[pkeys] = pvals
-                        #else bit prints event owner data, if unpacks location
-                    for keys, values in event_data.iteritems():
-                        results_dict[keys] = values
-                else:
-                    continue
-            else:
-                continue
+    return event_data
 
-    print counter
+def detail_checks():
+    """Checks to make sure attending_count, etc fit parameters."""
+        results_dict = {}
+        #do I need to move/declare this individual_events-relevant stuff in 
+        #input_checks()? or is there another way?
+        if event_data['attending_count'] <= 75 and \
+            event_data['is_canceled'] is False and \
+            event_data['is_page_owned'] is False:
+            results_dict['url'] = "https://www.facebook.com/events/" + str(event_id) + "/"
+            results_dict['event_name'] = individual_events['name']
+            results_dict['event_description'] = individual_events['description']
 
-    if results_dict == {}:
-        flash("No results found.")
-        return redirect('/event-search')
 
-    json.dump(results_dict, open('event-results.json', 'w'))
-    json.dump(check_pagination, open('pagination.json', 'w'))
-    pprint(results_dict)
+
+    #                 for pkeys, pvals in individual_events['place'].iteritems():
+    #                     if str(pkeys) == 'location':
+    #                         for lkeys, lvals in pvals.iteritems():
+    #                             results_dict[lkeys] = lvals
+    #                     else:
+    #                         results_dict[pkeys] = pvals
+    #                     #else bit prints event owner data, if unpacks location
+    #                 for keys, values in event_data.iteritems():
+    #                     results_dict[keys] = values
+
+
+    # if results_dict == {}:
+    #     flash("No results found.")
+    #     return redirect('/event-search')
+
+    # json.dump(results_dict, open('event-results.json', 'w'))
+    # json.dump(check_pagination, open('pagination.json', 'w'))
+    # pprint(results_dict)
 
     #https://en.wikipedia.org/wiki/ISO_8601 - FB returns time like the example
 
