@@ -1,4 +1,4 @@
-import facebook, json, os, time
+import facebook, json, os
 from pprint import pprint
 from flask import Flask, flash, redirect, request, render_template, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
@@ -8,6 +8,7 @@ app.secret_key = "ultra secret ssssh"
 user_token = os.environ['FACEBOOK_USER_TOKEN']
 gmaps_key = os.environ['GOOGLE_MAPS_TOKEN']
 graph = facebook.GraphAPI(access_token=user_token, version=2.10)
+
 
 @app.route("/")
 def homepage():
@@ -26,33 +27,38 @@ def render_event_form():
 @app.route("/upcoming-events", methods=["GET"])
 def grab_events():
     """Gets from HTML, grabs and returns events from Graph API."""
-    #fixed
 
     event_keyword = request.args.get('event-keyword').strip().replace(" ", "%20")
     search_location = request.args.get('city').strip().lower()
 
-    events = graph.request("/search?q=" + event_keyword + "&type=event&limit=10000", post_args={'method': 'get'}) 
-    return events, search_location
+    events = graph.request("/search?q=" + event_keyword + "&type=event&limit=10", post_args={'method': 'get'})
+    return jsonify(events), search_location, event_keyword
 
-def paginate():
+
+def paginate(events, event_keyword):
     """Allows next page of results from Graph."""
         #how do I tie pagination in with grab_events?
+    check_pagination = events.get('paging', {})
+    print check_pagination
 
-    for paging in check_pagination:
-       # # check_cursors = check_pagination.get('cursors', {})
-       #  check_after = check_cursors.get('after', '')
-       # # check_before = check_cursors.get('before', '')
-       #  check_next = check_pagination.get('next', '')
-        if check_after != '':
-            next_page = graph.request("/search?access_token=" + user_token + "&since=" + current_time + "&q=" + event_keyword + "&type=event&limit=1000&after=" + check_after)
-            #probably need to rewrite this at some point^
-    return render_template("/search-results.html", )
+    if check_pagination != {}:
+        for paging in check_pagination:
+            check_cursors = check_pagination.get('cursors', {})
+            check_after = check_cursors.get('after', '')
+            check_before = check_cursors.get('before', '')
+            check_next = check_pagination.get('next', '')
+            if check_after != '':
+                next_page = graph.request("/search?access_token=" + user_token + "&q=" + event_keyword + "&type=event&limit=1000&after=" + check_after)
+            else:
+                flash("End of results.")
+
+    return render_template("/search-results.html", next_page=next_page)
 
 
 def input_checks(event_keyword, search_location, events):
     """Performs checks on nested dicts, var existence/match checks."""
 
-    event_by_city = set()
+    event_by_city = []
 
     if event_keyword and search_location:
         for individual_events in events['data']:
@@ -79,23 +85,24 @@ def event_details(event_by_city):
     return event_data
 
 
-def detail_checks(event_data):
-    """Checks to make sure attending_count, etc fit parameters."""
+def detail_checks(event_data, events):
+    """Checks to make sure attending_count, etc fit parameters. Puts events \
+    set to be returned to user."""
 
-    results_dict = {}
-        #do I need to move/declare this individual_events-relevant stuff in 
-        #input_checks()? or is there another way?
-    if event_data['attending_count'] <= 75 and \
-        event_data['is_canceled'] is False and \
-            event_data['is_page_owned'] is False:
-        results_dict['url'] = "https://www.facebook.com/events/" + str(#ID OF EVENT) + "/"
-        #based on how I've rewritten input_checks(), how do I get event_id?
-        results_dict['event_name'] = individual_events['name']
-        results_dict['event_description'] = individual_events['description'] #syntax error on this line? why?
-        event_set = set()
-        event_set.add(events)
+    results_dictionary = {}
+        #is this impractical? do I only need to run through events['data'] in input_checks()?
+    for individual_events in events['data']:
+        if event_data['attending_count'] <= 75 and \
+            event_data['is_canceled'] is False and \
+                event_data['is_page_owned'] is False:
+            results_dictionary['url'] = "https://www.facebook.com/events/"# + str(ID OF EVENT) + "/"
+            #based on how I've rewritten input_checks(), how do I get individual event ids?
+            results_dictionary['event_name'] = individual_events['name']
+            results_dictionary['event_description'] = individual_events['description']
+            event_set = set()
+            event_set.add(individual_events)
 
-    return event_set
+    return event_set, results_dictionary
 
 
 # need to find places for all this:
@@ -109,13 +116,10 @@ def detail_checks(event_data):
     #                 for keys, values in event_data.iteritems():
     #                     results_dict[keys] = values
 
-    # json.dump(check_pagination, open('pagination.json', 'w'))
-    # pprint(results_dict)
-
-def result_return():
+def result_return(results_dictionary):
     """Handles edge cases, returns results."""
 
-    if results_dict == {}:
+    if results_dictionary == {}:
         flash("No results found.")
         return redirect('/event-search')
 
