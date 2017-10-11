@@ -6,14 +6,9 @@
 {% endblock %}
 
 {% block content %}
-    <script src="https://maps.googleapis.com/maps/api/js?key=" + gmaps_key>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD17oKxp94Ju2S5bGOnApOe38KVRNL2tCE">
     </script>
     <script src="/static/map.js"></script>
     <script src="/static/mapstyle.js"></script>
     <div id='event-map'></div>
-
-    {% if check_pagination != {} %}
-        <a href="/pagination">Next</a>
-        <!--there's gotta be a better way to do this -->
-    {% endif %}
 {% endblock %}

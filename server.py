@@ -40,11 +40,13 @@ def grab_events():
         returned_events.extend(checker)
         events = paginate(events, event_keyword)
         if not events['data']:
-            #check for paging token
+            #check for paging token instead
             flash("No more results.")
             break
 
-    pprint(returned_events)
+    #pprint(returned_events)
+    for single_events in returned_events:
+        json.dump(single_events, open('event-results.json', 'w'))
     return render_template("/search-results.html")
 
 
@@ -58,8 +60,8 @@ def paginate(events, event_keyword):
         for paging in check_pagination:
             check_cursors = check_pagination.get('cursors', {})
             check_after = check_cursors.get('after', '')
-            check_before = check_cursors.get('before', '')
-            check_next = check_pagination.get('next', '')
+            #check_before = check_cursors.get('before', '')
+            #check_next = check_pagination.get('next', '')
             if check_after != '':
                 next_page = graph.request("/search?access_token=" + user_token + "&q=" + event_keyword + "&type=event&limit=1000&after=" + check_after)
 
@@ -98,8 +100,8 @@ def event_details(event_by_city):
 
 
 def detail_checks(event_data, events):
-    """Checks to make sure attending_count, etc fit parameters. Puts events \
-    set to be returned to user."""
+    """Checks to make sure attending_count, etc fit parameters. Creates event \
+    list."""
 
     results_dictionary = {}
     event_list = []
@@ -108,30 +110,23 @@ def detail_checks(event_data, events):
         if individual_event['attending_count'] <= 75 and \
             individual_event['is_canceled'] is False and \
                 individual_event['is_page_owned'] is False:
-            results_dictionary['url'] = "https://www.facebook.com/events/"  # + str(ID OF EVENT) + "/"
-            #based on how I've rewritten input_checks(), how do I get individual event ids?
-            for pkeys, pvals in individual_event['place'].iteritems():
-                if str(pkeys) == 'location':
-                    for lkeys, lvals in pvals.iteritems():
-                        results_dictionary[lkeys] = lvals
+            for ikeys, ivals in individual_event.iteritems():
+                if str(ikeys) == 'place':
+                    for pkeys, pvals in ivals.iteritems():
+                        if str(pkeys) == 'location':
+                            for lkeys, lvals in pvals.iteritems():
+                                results_dictionary[lkeys] = lvals
                 else:
-                    results_dictionary[pkeys] = pvals
-                #else bit prints event owner data, if unpacks location
-            for keys, values in individual_event.iteritems():
-                results_dictionary[keys] = values
+                    results_dictionary[ikeys] = ivals
+                #else bit assigns basic event info, ifs unpack place + location
+            results_dictionary['url'] = "https://www.facebook.com/events/" + individual_event['id']
             event_list.append(results_dictionary)
 
-    return event_list
-
-
-def result_return(event_set):
-    """Handles edge cases, returns results."""
-
-    if event_set == set():
+    if event_list == []:
         flash("No results found.")
         return redirect('/event-search')
 
-    return render_template("/search-results", event_set=event_set)
+    return event_list
 
 
 @app.route("/process-json")
@@ -144,8 +139,7 @@ def jconvert():
     data = json.loads(json_string)
     return jsonify(data)
 
-
-### Helper Functions ####
+### Debugger ####
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
     app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
