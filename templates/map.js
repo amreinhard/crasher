@@ -1,1 +1,0 @@
-var maps_key = AIzaSyD7lvYh6B1mVq3aSbMvioSCqnN8OTu3aIA;

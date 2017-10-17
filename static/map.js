@@ -3,6 +3,7 @@
 $.get('/process-json', function(results){
     console.log(results);
     initMap(results);
+    createMarker(results);
 });
 
 function initMap(results) {
@@ -22,7 +23,7 @@ function initMap(results) {
 
     function createMarker(results) {
         var marker;
-       // for (var contents in results) {
+        for (var contents in results) {
             if (results.hasOwnProperty("longitude") && results.hasOwnProperty('latitude')) {
                 marker = new google.maps.Marker({
                     position: new google.maps.LatLng(results.latitude, results.longitude),
@@ -32,14 +33,14 @@ function initMap(results) {
 
                 var eventPreview = (
                     '<div class="window-content">' +
-                        '<p><b>Event description: </b>' + results.event_description + '</p>' +
+                        '<p><b>Event description: </b>' + results.description + '</p>' +
                         '<p><b>Location: </b>' + results.street + '</p>' +
-                        '<p><b>Link: ' + '<a href="' + results.url + '">' + results.event_name + '</a></p>' +
+                        '<p><b>Link: ' + '<a href="' + results.url + '">' + results.name + '</a></p>' +
                     '</div>');
 
                 bindInfoWindow(marker, eventMap, infoWindow, eventPreview);
             }
-    }
+        };
 
     createMarker(results);
 
@@ -50,4 +51,5 @@ function initMap(results) {
           infoWindow.open(eventMap, marker);
       });
   }
+}
 }

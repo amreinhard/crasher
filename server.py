@@ -6,7 +6,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 app = Flask(__name__)
 app.secret_key = "ultra secret ssssh"
 user_token = os.environ['FACEBOOK_USER_TOKEN']
-gmaps_key = str(os.environ['GOOGLE_MAPS_TOKEN'])
+gmaps_key = os.environ['GOOGLE_MAPS_TOKEN']
 graph = facebook.GraphAPI(access_token=user_token, version=2.10)
 
 
@@ -28,28 +28,28 @@ def render_event_form():
 def grab_events():
     """Gets from HTML, grabs and returns events from Graph API."""
 
-    event_keywords = ['party', 'goodbye', 'going away', 'celebration', 'promotion',
-                      'house party', 'halloween', 'costume', 'birthday', 'brunch', 
-                      'dinner', 'dance', 'BBQ', 'karaoke', 'adventure', 'celebrate', 
-                      'beach party', 'heist', 'picnic', 'housewarming', 'bday',
-                      'anniversary', 'birthday party', 'potluck', 'pregame']
+    event_keywords = ["!"] #,'party', 'goodbye', 'housewarming', 'this', 'beach', 'celebration', 'promotion',
+                      #'halloween', 'birthday', 'brunch', 'food', 'meetup', 'bash',
+                      #'dinner', 'dance', 'BBQ', 'karaoke', 'adventure', 'celebrate',
+                      #'heist', 'picnic', 'housewarming', 'bday', 'social', 'banquet',
+                      #'anniversary', 'potluck', 'pregame', 'networking', 'holiday',
+                      #'ceremony', 'gala', 'revelry', 'cookout', 'barbecue']
     search_location = request.args.get('city').strip().lower()
     returned_events = []
 
     for event_keyword in event_keywords:
         events = graph.request("/search?q=" + event_keyword + "&type=event&limit=1000", post_args={'method': 'get'})
-        print len(events['data'])
+        print len(events['data']), 'event length', event_keyword
         while events['data']:
             event_list = input_checks(search_location, events)
             event_list = event_details(event_list)
             checker = detail_checks(event_list, events)
             returned_events.extend(checker)
+            print returned_events, "returned events"
             events = paginate(events, event_keyword)
+            json.dump(returned_events, open('event-results.json', 'w'))
             break
 
-    #pprint(returned_events)
-    for single_events in returned_events:
-        json.dump(single_events, open('event-results.json', 'w'))
     return render_template("/search-results.html")
 
 
@@ -70,7 +70,7 @@ def input_checks(search_location, events):
     else:
         flash("You have to fill in both fields!")
         return redirect("/event-search")
-
+    print event_by_city
     return event_by_city
 
 
@@ -85,6 +85,7 @@ def event_details(event_by_city):
         category,description,start_time,end_time,interested_count,is_canceled, \
         is_page_owned,name,place,ticket_uri,timezone,type')
 
+    print event_data, "event data"
     return event_data
 
 
@@ -94,6 +95,7 @@ def detail_checks(event_data, events):
 
     results_dictionary = {}
     event_list = []
+    #put things from loop in set, THEN dict
 
     if event_data != {}:
         for individual_event in event_data.values():
