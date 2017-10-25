@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Event Details{% endblock %}
+{% block head %}     
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+{% endblock %}
+
+{% block content %}
+<body class="event-details">
+    <h1 class="h1name">{{ results.name }}</h1><br><br>
+    <div class="container">
+        <table class="table">
+            <tbody>
+                <tr>
+                    <div class="col-md-2"></div>
+                    <td class="col-md-2"><b>Event description: </b></td>
+                    <td class="col-md-6">{{ results.description }} </td>
+                    <div class="col-md-2"></div>
+                </tr>
+                {% if results['street'] %}
+                <tr>
+                    <div class="col-md-2"></div>
+                    <td class="col-md-2"><b>Address: </b></td>
+                    <td class="col-md-6">{{ results.street }}<br>
+                    {{ results.city }}, {{ results.state }} {{ results.zip }}</td>
+                    <div class="col-md-2"></div>
+                </tr>
+                {% endif %}
+                <tr>
+                    <div class="col-md-2"></div>
+                    <td class="col-md-2"><b>Number attending: </b></td>
+                    <td class="col-md-6">{{ results.attending_count }}</td>
+                    <div class="col-md-2"></div>
+                </tr>
+                <tr>
+                    <div class="col-md-2"></div>
+                    <td class="col-md-2"><b>Number interested: </b></td>
+                    <td class="col-md-6">{{ results.interested_count }}</td>
+                    <div class="col-md-2"></div>
+                </tr>
+                <tr>
+                    <div class="col-md-2"></div>
+                    <td class="col-md-2"><b>Facebook event URL: </b></td>
+                    <td class="col-md-6"><a href="{{ results.url }}">Link</a></td>
+                    <div class="col-md-2"></div>
+                </tr>
+                <tr>
+                    <div class="col-md-2"></div>
+                    <td class="col-md-2"><b>Start time: </b></td>
+                    <td class="col-md-6">{{ results.start_time }}</td>
+                    <div class="col-md-2"></div>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+{% endblock %}
