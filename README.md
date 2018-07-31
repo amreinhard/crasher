@@ -12,7 +12,7 @@ This is my final project for Hackbright. It searches by keyword for parties, the
 * Links to the FB event pages themselves and provides detail page for each event
 __________
 
-<b>Tech stack</b>: Python, JavaScript, HTML, CSS, Flask, JQuery, Jinja, Bootstrap
+<b>Tech stack</b>: Python, JavaScript, HTML, CSS, Flask, JQuery, Jinja, Bootstrap<br>
 Utilizes Facebook Graph API and Google Maps API
 
 __________
